@@ -1,4 +1,7 @@
 const schedule = require('node-schedule');
-schedule.scheduleJob('* * * * *', function(){
-    console.log('The answer to life, the universe, and everything!');
-  });s
+const producers = require('./producer')
+const db = require('./database/mysql')
+schedule.scheduleJob('* * * * *', async function(){
+  const events = await db.fetchEvents
+  await producers.senddata(events);
+  });

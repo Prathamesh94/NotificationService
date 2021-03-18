@@ -8,11 +8,13 @@ const producer = kafka.producer();
 producer.connect()
 function senddata(events) {
     return new Promise(async () => {
+        if(events.length){
+            await producer.send({
+                topic: process.env.topic,
+                messages: events,
+            })
+        }
 
-        await producer.send({
-            topic: process.env.topic,
-            messages: events,
-        })
 
     })
 }

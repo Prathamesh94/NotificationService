@@ -6,11 +6,28 @@ const connection = mysql.createConnection({
     password: process.env.dbpassword,
     database: process.env.dbname
 });
-function events(first_name, last_name, user_id, avatar_file_path) {
+function fetchEvents() {
     return new Promise((resolve, reject) => {
-        connection.query(`INSERT INTO users(first_name,last_name,user_id,avatar_file_path) VALUES('${first_name}','${last_name}','${user_id}','${avatar_file_path}')`, function (error, results, fields) {
+        var dateTime = require('node-datetime');
+        var dt = dateTime.create();
+        dt.offsetInHours(-0.06);
+        var formatted = dt.format('Y-m-d H:M:S');
+        console.log(`select * from notification where scheduled_time < '${formatted}'`)
+        connection.query(`select * from notification where scheduled_time < '${formatted}'`, function (error, results, fields) {
             if (error) reject(error);
+            console.log(results)
             resolve(results)
         });
     })
 }
+function insertEvent(event_message,scheduled_time){
+    return new Promise((resolve, reject) => {
+        connection.query(`INSERT INTO notification (event_message,scheduled_time) values('${event_message}','${scheduled_time}')`, function (error, results, fields) {
+            if (error) reject(error);
+            resolve(results)
+        });
+    })
+
+}
+exports.insertEvent = insertEvent
+exports.fetchEvents = fetchEvents

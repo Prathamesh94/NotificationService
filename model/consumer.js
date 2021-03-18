@@ -3,22 +3,31 @@
  * If Notification fails again publish event for retry
  * 
  */
+require('dotenv').config('../.env')
 const { Kafka } = require('kafkajs')
-
+const model = require('./model')
+const db = require('./database/mysql')
 const kafka = new Kafka({
-  clientId: 'my-app',
-  brokers: ['localhost:9092', 'localhost:9092']
+  clientId: process.env.clientId,
+  brokers: [process.env.kafkaBroker, process.env.kafkaBroker]
 })
-const consumer = kafka.consumer({ groupId: 'test-group' });
-(async () =>{
-await consumer.connect()
-await consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
+const consumer = kafka.consumer({ groupId: process.env.consumer_group });
+(async () => {
+  await consumer.connect()
+  await consumer.subscribe({ topic: process.env.topic, fromBeginning: true })
 
-await consumer.run({
-  eachMessage: async ({ topic, partition, message }) => {
-    console.log({
-      value: message.value.toString(),
-    })
-  },
-})
+  await consumer.run({
+    eachMessage: async ({ topic, partition, message }) => {
+      console.log({
+        value: message.value.toString(),
+      })
+      console.log(message)
+      try {
+        await model.sendNotification(message)
+      }
+      catch (error) {//retry mechanism
+        await db.insertEvent(message)
+      }
+    },
+  })
 })()

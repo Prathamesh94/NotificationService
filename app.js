@@ -3,13 +3,12 @@ const app = express()
 const port = 5001
 const model = require('./model/model.js')
 require('./model/consumer.js')
-const cors = require('cors');
+require('./model/scheduler')
+const db = require('./model/database/mysql')
 app.use(express.json());
-app.use(cors());
-
 app.post('/send/notification', async (req, res, next) => {
     try {
-        await model.produceEvents(req,res);
+        await db.insertEvent(req.body,req.body.scheduled_time)
         res.send({success:true})
     } catch (error) {
         res.send({success:false})

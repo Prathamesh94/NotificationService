@@ -2,9 +2,9 @@
 const whatsapp = require('./channels/whatsapp')
 const sms = require('./channels/sms')
 const email = require('./channels/email')
-const producer = require('./channels/producer')
+const producer = require('./producer')
 function sendNotification(data) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             if (data.channel = 'sms') {
                 await sms.notify(data)
@@ -23,16 +23,4 @@ function sendNotification(data) {
     })
 
 }
-function schduleEvent(req) {
-    return new Promise((resolve, reject) => {
-        try {
-            await producer.senddata(req.body)
-            resolve(true)
-        } catch (error) {
-            reject(error)
-
-        }
-    })
-}
 exports.sendNotification = sendNotification
-exports.produceEvents = produceEvents
